@@ -9,26 +9,28 @@ A modular interaction/dialogue system for FiveM featuring:
 
 ---
 
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
-## License
+- [Usage](#usage)
+  - [Editor (NUI)](#editor-nui)
+  - [Runtime (in-game)](#runtime-in-game)
+  - [Dialogue Controls](#dialogue-controls)
+  - [Call a flow from another script](#call-a-flow-from-another-script)
+- [Database](#database)
+- [Resource Structure](#resource-structure)
+- [Screenshots / Images](#screenshots--images)
+- [Contributing](#contributing)
+- [License](#license)
 
-This project is licensed under the PolyForm Noncommercial License 1.0.0 (code-specific, non-commercial).
+---
 
-Key points:
-- Non-commercial only: you may not use this software for commercial purposes without a separate commercial license from the copyright holder.
-- Attribution/Notices: retain copyright notices and this license in source distributions.
+## Features
 
-Full legal text: https://polyformproject.org/licenses/noncommercial/1.0.0/
-
-Recommended attribution example:
-
-- rc-interactions — A modular interaction/dialogue system for FiveM
-- Author: (original author name)
-- Source: https://github.com/xbymarcos/rc-interactions
-- Licensed under PolyForm Noncommercial 1.0.0 — https://polyformproject.org/licenses/noncommercial/1.0.0/
-
-If you prefer a different code-specific non-commercial license (for example BSL or a custom dual-license), tell me which and I will update files accordingly.
+- Visual editor to create projects and connect nodes (Start / Dialogue / Condition / Event / End).
 - MySQL persistence (tables: `rc_interactions`, `rc_interaction_groups`).
 - World NPCs defined by the `START` node (coords + model).
 - Optional integration with `qb-target` or `ox_target` (via `Config.UseTarget`).
@@ -38,7 +40,6 @@ If you prefer a different code-specific non-commercial license (for example BSL 
   - exit/cancel using `ESC`.
 - Cinematic camera focusing the NPC during the conversation.
 - Optional NPC speech/lipsync during dialogue (configurable).
-
 ---
 
 ## Requirements
