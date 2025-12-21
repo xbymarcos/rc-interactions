@@ -42,11 +42,28 @@ A modular interaction/dialogue system for FiveM featuring:
 - Optional NPC speech/lipsync during dialogue (configurable).
 ---
 
+## Screenshots / Images
+
+### In-game dialogue (NUI)
+
+![In GAME Dialogue](docs/images/in-game.png)
+
+### Dashboard
+
+![Dashboard](docs/images/dashboard.png)
+
+### Node editor
+
+![Node Editor](docs/images/node-editor.png)
+
+### Web simulation
+
+![Simulator](docs/images/simulator.png)
+
+---
 ## Requirements
 
-- **FiveM** server (fxserver) with `fx_version cerulean`.
 - **oxmysql** (required): the resource uses `@oxmysql/lib/MySQL.lua`.
-- **MySQL / MariaDB**.
 - (Optional) **qb-target** or **ox_target** if you want the "Talk" target interaction.
 - For building the NUI (only if you modify the web UI): **Node.js**.
 
@@ -182,26 +199,6 @@ The resource also attempts to ensure tables exist on startup (see `server/main.l
 - `client/main.lua`: editor open/close (NUI visibility).
 - `client/runtime.lua`: NPC spawn, target interaction, flow execution, and runtime UI.
 - `web/`: React app (editor/simulation/runtime UI) and the compiled build in `web/dist`.
-
----
-
-## Screenshots / Images
-
-### In-game dialogue (NUI)
-
-![In GAME Dialogue](docs/images/in-game.png)
-
-### Dashboard
-
-![Dashboard](docs/images/dashboard.png)
-
-### Node editor
-
-![Node Editor](docs/images/node-editor.png)
-
-### Web simulation
-
-![Simulator](docs/images/simulator.png)
 
 ---
 
