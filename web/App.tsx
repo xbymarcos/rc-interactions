@@ -93,8 +93,19 @@ const App: React.FC = () => {
       }
     };
 
+    const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+            handleClose();
+        }
+    };
+
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+        window.removeEventListener('message', handleMessage);
+        window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [editorVisible, runtimeDialogue]);
 
   const handleSelectRuntimeChoice = (choiceId: string) => {
@@ -125,13 +136,11 @@ const App: React.FC = () => {
   };
 
   const handleDeleteProject = (id: string) => {
-    if (window.confirm(t('app.confirm_delete'))) {
-      fetchNui('deleteProject', { id });
-      setProjects(prev => prev.filter(p => p.id !== id));
-      if (currentProjectId === id) {
-        setCurrentProjectId(null);
-        setView('DASHBOARD');
-      }
+    fetchNui('deleteProject', { id });
+    setProjects(prev => prev.filter(p => p.id !== id));
+    if (currentProjectId === id) {
+      setCurrentProjectId(null);
+      setView('DASHBOARD');
     }
   };
 
@@ -162,10 +171,9 @@ const App: React.FC = () => {
        alert(t('dashboard.error_delete_general'));
        return;
      }
-     if (window.confirm(t('dashboard.confirm_delete_group', { name }))) {
-       setProjects(prev => prev.map(p => p.group === name ? { ...p, group: 'General' } : p));
-       setGroups(prev => prev.filter(g => g !== name));
-     }
+     
+     setProjects(prev => prev.map(p => p.group === name ? { ...p, group: 'General' } : p));
+     setGroups(prev => prev.filter(g => g !== name));
   };
 
   const handleUpdateCurrentProjectData = (newData: ProjectData | ((prev: ProjectData) => ProjectData)) => {

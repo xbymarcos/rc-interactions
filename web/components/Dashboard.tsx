@@ -34,6 +34,10 @@ const Dashboard: React.FC<DashboardProps> = ({
   
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
+  // Confirmation States
+  const [projectToDelete, setProjectToDelete] = useState<string | null>(null);
+  const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+
   const filteredProjects = useMemo(() => {
     return projects.filter(p => {
       const matchesGroup = selectedGroup === 'All' ? true : p.group === selectedGroup;
@@ -62,8 +66,13 @@ const Dashboard: React.FC<DashboardProps> = ({
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     e.stopPropagation();
-    onDelete(id);
+    setProjectToDelete(id);
   };
+
+  const handleGroupDeleteClick = (e: React.MouseEvent, groupName: string) => {
+    e.stopPropagation();
+    setGroupToDelete(groupName);
+  }
 
   const handleMoveClick = (e: React.MouseEvent, id: string, group: string) => {
     e.preventDefault();
@@ -71,6 +80,20 @@ const Dashboard: React.FC<DashboardProps> = ({
     onMove(id, group);
     setOpenDropdownId(null);
   };
+
+  const confirmDeleteProject = () => {
+    if (projectToDelete) {
+        onDelete(projectToDelete);
+        setProjectToDelete(null);
+    }
+  }
+
+  const confirmDeleteGroup = () => {
+      if (groupToDelete) {
+          onDeleteGroup(groupToDelete);
+          setGroupToDelete(null);
+      }
+  }
 
   return (
     <div className="w-full h-full bg-[#09090b] flex overflow-hidden">
@@ -102,7 +125,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                </button>
                {group !== 'General' && (
                   <button 
-                    onClick={(e) => { e.stopPropagation(); onDeleteGroup(group); }}
+                    onClick={(e) => handleGroupDeleteClick(e, group)}
                     className="absolute right-10 top-2 text-rose-800 opacity-0 group-hover/item:opacity-100 hover:text-rose-500 transition-all text-[10px]"
                     title="Delete Group"
                   >✕</button>
@@ -302,6 +325,60 @@ const Dashboard: React.FC<DashboardProps> = ({
            </div>
         </div>
       )}
+
+      {/* CONFIRM DELETE PROJECT MODAL */}
+      {projectToDelete && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+           <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 shadow-2xl p-8 animate-in zoom-in-95 duration-200 rounded-sm border-l-4 border-l-rose-600">
+              <h2 className="text-xl font-black text-rose-500 uppercase tracking-widest mb-2">Delete Flow?</h2>
+              <p className="text-zinc-400 text-sm mb-6">Are you sure you want to delete this interaction flow? This action cannot be undone.</p>
+              
+              <div className="flex items-center gap-3 pt-2">
+                <button 
+                  onClick={() => setProjectToDelete(null)}
+                  className="flex-1 py-3 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDeleteProject}
+                  className="flex-1 py-3 bg-rose-600 text-white hover:bg-rose-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:shadow-rose-900/20"
+                >
+                  Delete
+                </button>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE GROUP MODAL */}
+      {groupToDelete && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+           <div className="w-full max-w-md bg-zinc-950 border border-zinc-800 shadow-2xl p-8 animate-in zoom-in-95 duration-200 rounded-sm border-l-4 border-l-rose-600">
+              <h2 className="text-xl font-black text-rose-500 uppercase tracking-widest mb-2">Delete Group?</h2>
+              <p className="text-zinc-400 text-sm mb-6">
+                Are you sure you want to delete the group <span className="font-bold text-white">"{groupToDelete}"</span>? 
+                All projects in this group will be moved to "General".
+              </p>
+              
+              <div className="flex items-center gap-3 pt-2">
+                <button 
+                  onClick={() => setGroupToDelete(null)}
+                  className="flex-1 py-3 border border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 text-[10px] font-black uppercase tracking-[0.2em] transition-all"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={confirmDeleteGroup}
+                  className="flex-1 py-3 bg-rose-600 text-white hover:bg-rose-500 text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:shadow-rose-900/20"
+                >
+                  Delete Group
+                </button>
+              </div>
+           </div>
+        </div>
+      )}
+
     </div>
   );
 };
