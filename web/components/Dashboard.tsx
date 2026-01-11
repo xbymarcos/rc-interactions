@@ -12,6 +12,7 @@ interface DashboardProps {
   onMove: (id: string, targetGroup: string) => void;
   onCreateGroup: (name: string) => void;
   onDeleteGroup: (name: string) => void;
+  onImport: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ 
@@ -22,7 +23,8 @@ const Dashboard: React.FC<DashboardProps> = ({
   onDelete,
   onMove,
   onCreateGroup,
-  onDeleteGroup
+  onDeleteGroup,
+  onImport
 }) => {
   const { t } = useLanguage();
   const [selectedGroup, setSelectedGroup] = useState<string>('All');
@@ -183,12 +185,20 @@ const Dashboard: React.FC<DashboardProps> = ({
               </div>
            </div>
 
-           <button 
-             onClick={() => setIsCreatingProject(true)}
-             className="px-6 py-2.5 bg-zinc-100 text-zinc-950 text-[10px] font-black tracking-[0.2em] uppercase hover:bg-white transition-all shadow-lg hover:shadow-emerald-500/20"
-           >
-             {t('dashboard.new_flow')}
-           </button>
+           <div className="flex items-center gap-3">
+             <button 
+               onClick={onImport}
+               className="px-6 py-2.5 border border-zinc-800 text-zinc-400 text-[10px] font-black tracking-[0.2em] uppercase hover:text-zinc-100 hover:border-zinc-500 transition-all"
+             >
+               {t('dashboard.import_json')}
+             </button>
+             <button 
+               onClick={() => setIsCreatingProject(true)}
+               className="px-6 py-2.5 bg-zinc-100 text-zinc-950 text-[10px] font-black tracking-[0.2em] uppercase hover:bg-white transition-all shadow-lg hover:shadow-emerald-500/20"
+             >
+               {t('dashboard.new_flow')}
+             </button>
+           </div>
         </div>
 
         {/* Grid Area */}
