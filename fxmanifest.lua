@@ -2,9 +2,9 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-author 'GitHub Copilot'
+author 'RealCity Developments - xByMarcos - <https://realcity.dev>'
 description 'Modular Interaction System for FiveM'
-version '1.0.0'
+version '1.0.1'
 
 -- Shared Scripts
 shared_scripts {
