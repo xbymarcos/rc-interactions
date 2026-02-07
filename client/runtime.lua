@@ -253,6 +253,15 @@ function ProcessNode(project, node)
         SetNuiFocus(false, false)
         SendNUIMessage({ action = 'closeDialogue' })
         
+        -- Trigger event for external integrations
+        TriggerEvent('rc-interactions:dialogueEnded', {
+            projectId = project.id,
+            cancelled = false
+        })
+        if Config.Debug then
+            print('[RC-Interactions] Dialogue ended - Project: ' .. project.id .. ' | Cancelled: false')
+        end
+        
     elseif node.type == 'CONDITION' then
         local result = CheckCondition(node.data)
         local portId = result and 'true' or 'false'
@@ -363,6 +372,16 @@ RegisterNUICallback('cancelInteraction', function(data, cb)
     DestroyInteractionCam()
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'closeDialogue' })
+    
+    -- Trigger event for external integrations
+    TriggerEvent('rc-interactions:dialogueEnded', {
+        projectId = projectId,
+        cancelled = true
+    })
+    if Config.Debug then
+        print('[RC-Interactions] Dialogue ended - Project: ' .. tostring(projectId) .. ' | Cancelled: true')
+    end
+    
     cb('ok')
 end)
 
