@@ -7,6 +7,11 @@ Config.Framework = 'auto'
 -- Debug Mode
 Config.Debug = true
 
+-- Version Check
+-- Checks GitHub releases on resource start for new versions.
+-- Set to false to disable.
+Config.CheckForUpdates = true
+
 -- Interaction Settings
 Config.InteractionDistance = 3.0
 Config.UseTarget = true -- Requires qb-target or ox_target
