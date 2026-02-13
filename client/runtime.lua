@@ -1,6 +1,7 @@
 local Interactions = {}
 local SpawnedEntities = {}
 local ActiveZones = {}
+local InteractionMemory = {}
 local cam = nil
 local talkLoopToken = 0
 local activeTalkProjectId = nil
@@ -249,6 +250,9 @@ function ProcessNode(project, node)
         -- Destroy Cam
         DestroyInteractionCam()
 
+        -- Clear interaction memory
+        InteractionMemory = {}
+
         -- Close UI
         SetNuiFocus(false, false)
         SendNUIMessage({ action = 'closeDialogue' })
@@ -266,6 +270,18 @@ function ProcessNode(project, node)
         local result = CheckCondition(node.data)
         local portId = result and 'true' or 'false'
         local nextNode = FindNextNode(project, node.id, portId)
+        ProcessNode(project, nextNode)
+
+    elseif node.type == 'SET_VARIABLE' then
+        -- Store variable in memory
+        if node.data.variableName then
+            InteractionMemory[node.data.variableName] = node.data.variableValue or ''
+            if Config.Debug then
+                print('[RC-Interactions] Set variable: ' .. node.data.variableName .. ' = ' .. tostring(node.data.variableValue))
+            end
+        end
+        -- Continue to next node
+        local nextNode = FindNextNode(project, node.id, 'main')
         ProcessNode(project, nextNode)
 
     elseif node.type == 'EVENT' then
@@ -288,7 +304,23 @@ function CheckCondition(data)
     
     local varType, varName = data.variableName:match("([^:]+):(.+)")
     if not varType then 
-        -- Fallback for simple variables or custom logic
+        -- Fallback: check InteractionMemory for simple variables (set by SET_VARIABLE nodes)
+        local memValue = InteractionMemory[data.variableName] or ''
+        local targetValue = data.variableValue or ''
+        local op = data.conditionOperator or '=='
+
+        local numA = tonumber(memValue)
+        local numB = tonumber(targetValue)
+        local isNumeric = numA ~= nil and numB ~= nil
+
+        if op == '==' then return memValue == targetValue
+        elseif op == '!=' then return memValue ~= targetValue
+        elseif op == '>' then return isNumeric and numA > numB or false
+        elseif op == '<' then return isNumeric and numA < numB or false
+        elseif op == '>=' then return isNumeric and numA >= numB or false
+        elseif op == '<=' then return isNumeric and numA <= numB or false
+        end
+
         return false 
     end
 
@@ -370,6 +402,10 @@ RegisterNUICallback('cancelInteraction', function(data, cb)
     StopNpcTalkLoop()
     
     DestroyInteractionCam()
+
+    -- Clear interaction memory
+    InteractionMemory = {}
+
     SetNuiFocus(false, false)
     SendNUIMessage({ action = 'closeDialogue' })
     
