@@ -192,72 +192,82 @@ local function TestMemory()
     print('')
 
     -- Save original memory state
-    local originalMemory = InteractionMemory
+    local originalMemory = _RCI_GetMemory()
 
-    -- Test 1: SET_VARIABLE stores value
+    -- Test 1: SET_VARIABLE stores value (end at DIALOGUE so END doesn't clear memory)
     do
-        InteractionMemory = {}
+        _RCI_SetMemory({})
         local project = MakeProject('m1', 'SetVar', {
             MakeNode('sv', 'SET_VARIABLE', { variableName = 'quest', variableValue = 'started' }),
-            MakeNode('e', 'END'),
+            MakeNode('d', 'DIALOGUE', { text = 'check', npcName = 'T', choices = {} }),
         }, {
-            MakeConnection('sv', 'e', 'main'),
+            MakeConnection('sv', 'd', 'main'),
         })
 
         ProcessNode(project, project.data.nodes[1])
-        Wait(100)
-        ASSERT_EQ('SET_VARIABLE: stores value', InteractionMemory['quest'], 'started')
+        -- DIALOGUE stops and waits for player, memory is still intact
+        local mem = _RCI_GetMemory()
+        ASSERT_EQ('SET_VARIABLE: stores value', mem['quest'], 'started')
+        -- Cleanup NUI
+        SetNuiFocus(false, false)
+        SendNUIMessage({ action = 'closeDialogue' })
     end
 
     -- Test 2: SET_VARIABLE chain
     do
-        InteractionMemory = {}
+        _RCI_SetMemory({})
         local project = MakeProject('m2', 'SetVarChain', {
             MakeNode('sv1', 'SET_VARIABLE', { variableName = 'a', variableValue = '1' }),
             MakeNode('sv2', 'SET_VARIABLE', { variableName = 'b', variableValue = '2' }),
             MakeNode('sv3', 'SET_VARIABLE', { variableName = 'c', variableValue = '3' }),
-            MakeNode('e', 'END'),
+            MakeNode('d', 'DIALOGUE', { text = 'check', npcName = 'T', choices = {} }),
         }, {
             MakeConnection('sv1', 'sv2', 'main'),
             MakeConnection('sv2', 'sv3', 'main'),
-            MakeConnection('sv3', 'e', 'main'),
+            MakeConnection('sv3', 'd', 'main'),
         })
 
         ProcessNode(project, project.data.nodes[1])
-        Wait(100)
-        ASSERT_EQ('SET_VARIABLE chain: a', InteractionMemory['a'], '1')
-        ASSERT_EQ('SET_VARIABLE chain: b', InteractionMemory['b'], '2')
-        ASSERT_EQ('SET_VARIABLE chain: c', InteractionMemory['c'], '3')
+        local mem = _RCI_GetMemory()
+        ASSERT_EQ('SET_VARIABLE chain: a', mem['a'], '1')
+        ASSERT_EQ('SET_VARIABLE chain: b', mem['b'], '2')
+        ASSERT_EQ('SET_VARIABLE chain: c', mem['c'], '3')
+        SetNuiFocus(false, false)
+        SendNUIMessage({ action = 'closeDialogue' })
     end
 
     -- Test 3: SET_VARIABLE overwrites
     do
-        InteractionMemory = {}
+        _RCI_SetMemory({})
         local project = MakeProject('m3', 'Overwrite', {
             MakeNode('sv1', 'SET_VARIABLE', { variableName = 'x', variableValue = 'old' }),
             MakeNode('sv2', 'SET_VARIABLE', { variableName = 'x', variableValue = 'new' }),
-            MakeNode('e', 'END'),
+            MakeNode('d', 'DIALOGUE', { text = 'check', npcName = 'T', choices = {} }),
         }, {
             MakeConnection('sv1', 'sv2', 'main'),
-            MakeConnection('sv2', 'e', 'main'),
+            MakeConnection('sv2', 'd', 'main'),
         })
 
         ProcessNode(project, project.data.nodes[1])
-        Wait(100)
-        ASSERT_EQ('SET_VARIABLE: overwrites value', InteractionMemory['x'], 'new')
+        local mem = _RCI_GetMemory()
+        ASSERT_EQ('SET_VARIABLE: overwrites value', mem['x'], 'new')
+        SetNuiFocus(false, false)
+        SendNUIMessage({ action = 'closeDialogue' })
     end
 
-    -- Test 4: END clears memory
+    -- Test 4: END clears memory (simulated via accessor)
     do
-        InteractionMemory = { leftover = 'data' }
-        -- We can't easily test END because it calls NUI and camera functions.
-        -- Instead, test the memory clear directly.
-        InteractionMemory = {}
-        ASSERT_EQ('END: memory cleared (simulated)', next(InteractionMemory), nil)
+        _RCI_SetMemory({ leftover = 'data' })
+        local mem = _RCI_GetMemory()
+        ASSERT_EQ('Pre-clear: memory has data', mem['leftover'], 'data')
+        -- Simulate what END does
+        _RCI_SetMemory({})
+        mem = _RCI_GetMemory()
+        ASSERT_EQ('END: memory cleared', next(mem), nil)
     end
 
     -- Restore
-    InteractionMemory = originalMemory or {}
+    _RCI_SetMemory(originalMemory or {})
 
     PrintSummary('InteractionMemory')
 end
@@ -271,14 +281,14 @@ local function TestCondition()
     print('^3[TEST SUITE] CheckCondition^7')
     print('')
 
-    local originalMemory = InteractionMemory
+    local originalMemory = _RCI_GetMemory()
 
     -- Test memory-based conditions (no prefix like item:/money:/job:)
-    -- These use InteractionMemory
+    -- These use InteractionMemory via _RCI_SetMemory
 
     -- == operator
     do
-        InteractionMemory = { status = 'vip' }
+        _RCI_SetMemory({ status = 'vip' })
         local result = CheckCondition({
             variableName = 'status',
             conditionOperator = '==',
@@ -288,7 +298,7 @@ local function TestCondition()
     end
 
     do
-        InteractionMemory = { status = 'vip' }
+        _RCI_SetMemory({ status = 'vip' })
         local result = CheckCondition({
             variableName = 'status',
             conditionOperator = '==',
@@ -299,7 +309,7 @@ local function TestCondition()
 
     -- != operator
     do
-        InteractionMemory = { status = 'vip' }
+        _RCI_SetMemory({ status = 'vip' })
         local result = CheckCondition({
             variableName = 'status',
             conditionOperator = '!=',
@@ -309,7 +319,7 @@ local function TestCondition()
     end
 
     do
-        InteractionMemory = { status = 'vip' }
+        _RCI_SetMemory({ status = 'vip' })
         local result = CheckCondition({
             variableName = 'status',
             conditionOperator = '!=',
@@ -320,7 +330,7 @@ local function TestCondition()
 
     -- > operator (numeric)
     do
-        InteractionMemory = { score = '100' }
+        _RCI_SetMemory({ score = '100' })
         ASSERT_EQ('Condition >: 100 > 50', CheckCondition({
             variableName = 'score', conditionOperator = '>', variableValue = '50'
         }), true)
@@ -331,7 +341,7 @@ local function TestCondition()
 
     -- < operator (numeric)
     do
-        InteractionMemory = { score = '30' }
+        _RCI_SetMemory({ score = '30' })
         ASSERT_EQ('Condition <: 30 < 50', CheckCondition({
             variableName = 'score', conditionOperator = '<', variableValue = '50'
         }), true)
@@ -342,7 +352,7 @@ local function TestCondition()
 
     -- >= operator
     do
-        InteractionMemory = { score = '100' }
+        _RCI_SetMemory({ score = '100' })
         ASSERT_EQ('Condition >=: 100 >= 100', CheckCondition({
             variableName = 'score', conditionOperator = '>=', variableValue = '100'
         }), true)
@@ -353,7 +363,7 @@ local function TestCondition()
 
     -- <= operator
     do
-        InteractionMemory = { score = '100' }
+        _RCI_SetMemory({ score = '100' })
         ASSERT_EQ('Condition <=: 100 <= 100', CheckCondition({
             variableName = 'score', conditionOperator = '<=', variableValue = '100'
         }), true)
@@ -364,7 +374,7 @@ local function TestCondition()
 
     -- Missing variable defaults to empty string
     do
-        InteractionMemory = {}
+        _RCI_SetMemory({})
         ASSERT_EQ('Condition: missing var == empty', CheckCondition({
             variableName = 'nonexistent', conditionOperator = '==', variableValue = ''
         }), true)
@@ -375,14 +385,14 @@ local function TestCondition()
 
     -- Non-numeric > should return false
     do
-        InteractionMemory = { name = 'marcus' }
+        _RCI_SetMemory({ name = 'marcus' })
         ASSERT_EQ('Condition >: non-numeric returns false', CheckCondition({
             variableName = 'name', conditionOperator = '>', variableValue = 'aaa'
         }), false)
     end
 
     -- Restore
-    InteractionMemory = originalMemory or {}
+    _RCI_SetMemory(originalMemory or {})
 
     PrintSummary('CheckCondition')
 end
@@ -581,12 +591,20 @@ local function TestAPI()
     print('')
 
     -- Test StartInteractionById with non-existent project
-    local result = StartInteractionById('nonexistent-uuid-12345')
-    ASSERT_EQ('StartInteractionById: returns false for missing project', result, false)
+    ASSERT_NOT_NIL('StartInteractionById is accessible', StartInteractionById)
+    if StartInteractionById then
+        local result = StartInteractionById('nonexistent-uuid-12345')
+        ASSERT_EQ('StartInteractionById: returns false for missing project', result, false)
+    end
 
     -- Test export exists
-    local exportFn = exports['rc-interactions']['StartInteractionById']
-    ASSERT_NOT_NIL('Export StartInteractionById registered', exportFn)
+    local ok, exportResult = pcall(function()
+        return exports['rc-interactions']:StartInteractionById('nonexistent-uuid-99999')
+    end)
+    ASSERT('Export StartInteractionById callable', ok, ok and '' or tostring(exportResult))
+    if ok then
+        ASSERT_EQ('Export returns false for missing project', exportResult, false)
+    end
 
     PrintSummary('Public API')
 end

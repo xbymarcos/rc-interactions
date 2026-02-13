@@ -422,7 +422,7 @@ RegisterNUICallback('cancelInteraction', function(data, cb)
 end)
 
 -- Public API: allow other scripts to start a flow by UUID without the editor
-local function StartInteractionById(projectId)
+function StartInteractionById(projectId)
     if not projectId then return false end
 
     local project = nil
@@ -444,3 +444,9 @@ exports('StartInteractionById', StartInteractionById)
 RegisterNetEvent('rc-interactions:client:startInteractionById', function(projectId)
     StartInteractionById(projectId)
 end)
+
+-- Test helpers: expose local state for the test harness.
+-- These are only used by client/tests.lua when Config.Debug is true.
+function _RCI_GetMemory()      return InteractionMemory end
+function _RCI_SetMemory(t)     InteractionMemory = t end
+function _RCI_GetInteractions() return Interactions end
