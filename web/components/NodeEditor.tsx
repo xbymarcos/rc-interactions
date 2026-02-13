@@ -144,7 +144,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
     );
 
     const newConn: Connection = {
-      id: `conn-${Date.now()}`,
+      id: `conn-${crypto.randomUUID()}`,
       fromNodeId: activeConn.fromNodeId,
       fromPort: activeConn.fromPort,
       toNodeId: targetNodeId
@@ -245,14 +245,14 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
     }
 
     const newNode: DialogueNode = {
-      id: `${type.toLowerCase()}-${Date.now()}`,
+      id: `${type.toLowerCase()}-${crypto.randomUUID()}`,
       type,
       position: pos,
       data: {
         model: type === NodeType.START ? 'a_m_y_business_01' : undefined,
         npcName: "Entity",
         text: type === NodeType.DIALOGUE ? t('editor.type_text') : undefined,
-        choices: type === NodeType.DIALOGUE ? [{ id: `c-${Date.now()}`, text: t('editor.type_next'), nextNodeId: null }] : [],
+        choices: type === NodeType.DIALOGUE ? [{ id: `c-${crypto.randomUUID()}`, text: t('editor.type_next'), nextNodeId: null }] : [],
         variableName: "var",
         conditionOperator: '==',
         variableValue: "true"
@@ -293,7 +293,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
       ...prev,
       nodes: prev.nodes.map(node => {
         if (node.id === nodeId) {
-          const newChoice = { id: `c-${Date.now()}`, text: t('editor.type_option'), nextNodeId: null };
+          const newChoice = { id: `c-${crypto.randomUUID()}`, text: t('editor.type_option'), nextNodeId: null };
           return { ...node, data: { ...node.data, choices: [...(node.data.choices || []), newChoice] } };
         }
         return node;
@@ -369,7 +369,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
             </button>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[9px] font-bold text-zinc-300 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[60]">
-                UNDO
+                {t('editor.undo')}
             </div>
         </div>
 
@@ -383,7 +383,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 3.7"></path></svg>
             </button>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[9px] font-bold text-zinc-300 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[60]">
-                REDO
+                {t('editor.redo')}
             </div>
         </div>
 
@@ -398,7 +398,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[9px] font-bold text-zinc-300 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[60]">
-                RESET VIEW
+                {t('editor.reset_view')}
             </div>
         </div>
       </div>
@@ -610,12 +610,12 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
                              <div className="space-y-3">
                                 <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{t('editor.operator')}</label>
                                 <select value={node.data.conditionOperator} onChange={(e) => updateData('conditionOperator', e.target.value)} className="w-full bg-zinc-900 border-b border-zinc-800 py-2 text-[11px] font-mono text-zinc-300 focus:outline-none">
-                                    <option value="==">== Equals</option>
-                                    <option value="!=">!= Not Equals</option>
-                                    <option value=">">&gt; Greater Than</option>
-                                    <option value="<">&lt; Less Than</option>
-                                    <option value=">=">&gt;= Greater/Eq</option>
-                                    <option value="<=">&lt;= Less/Eq</option>
+                                    <option value="==">{t('editor.op_equals')}</option>
+                                    <option value="!=">{t('editor.op_not_equals')}</option>
+                                    <option value=">">{t('editor.op_greater')}</option>
+                                    <option value="<">{t('editor.op_less')}</option>
+                                    <option value=">=">{t('editor.op_greater_eq')}</option>
+                                    <option value="<=">{t('editor.op_less_eq')}</option>
                                 </select>
                              </div>
                         )}
@@ -635,7 +635,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
                 if (node.type === NodeType.START) return (
                   <>
                     <div className="space-y-3">
-                      <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">NPC MODEL</label>
+                      <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{t('editor.npc_model')}</label>
                       <input
                         type="text"
                         value={node.data.model || ''}
@@ -647,12 +647,12 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
 
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">COORDS (X Y Z W)</label>
+                        <label className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">{t('editor.coords')}</label>
                         <button
                           onClick={useMyPosition}
                           className="text-[9px] font-bold text-zinc-400 hover:text-white"
                         >
-                          USAR MI POSICIÓN
+                          {t('editor.use_my_position')}
                         </button>
                       </div>
 
@@ -683,7 +683,7 @@ const NodeEditor: React.FC<NodeEditorProps> = ({ project, setProject }) => {
                           value={node.data.coords?.w ?? ''}
                           onChange={(e) => updateCoords({ w: Number(e.target.value) })}
                           className="w-full bg-zinc-900 border-b border-zinc-800 py-2 text-[11px] font-mono text-zinc-300 focus:outline-none focus:border-zinc-400"
-                          placeholder="W (heading)"
+                          placeholder={t('editor.coord_w_heading')}
                         />
                       </div>
                     </div>

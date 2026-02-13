@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type RuntimeChoice = {
   id: string;
@@ -20,6 +21,7 @@ type Props = {
 };
 
 const RuntimeDialogue: React.FC<Props> = ({ data, onSelectChoice, onCancel }) => {
+  const { t } = useLanguage();
   const choices = data.choices ?? [];
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -90,8 +92,8 @@ const RuntimeDialogue: React.FC<Props> = ({ data, onSelectChoice, onCancel }) =>
             <div className="w-2 h-[2px] bg-zinc-800"></div>
             </div>
             <div>
-            <h2 className="text-zinc-500 text-[8px] font-black tracking-[0.3em] uppercase mb-0.5">INTERACTION</h2>
-            <h3 className="text-lg font-black text-zinc-100 tracking-tight uppercase shadow-black drop-shadow-md">{data.name || 'NPC'}</h3>
+            <h2 className="text-zinc-500 text-[8px] font-black tracking-[0.3em] uppercase mb-0.5">{t('runtime.header')}</h2>
+            <h3 className="text-lg font-black text-zinc-100 tracking-tight uppercase shadow-black drop-shadow-md">{data.name || t('runtime.npc_fallback')}</h3>
             </div>
         </div>
 
@@ -137,7 +139,7 @@ const RuntimeDialogue: React.FC<Props> = ({ data, onSelectChoice, onCancel }) =>
             ))}
             
             {choices.length === 0 && !isTyping && (
-                 <div className="text-[10px] text-zinc-500 font-mono animate-pulse">Waiting for event...</div>
+                 <div className="text-[10px] text-zinc-500 font-mono animate-pulse">{t('runtime.waiting_event')}</div>
             )}
             </div>
         </div>
@@ -149,17 +151,17 @@ const RuntimeDialogue: React.FC<Props> = ({ data, onSelectChoice, onCancel }) =>
                     <div className="w-4 h-4 border border-zinc-600 rounded-[2px] flex items-center justify-center text-[8px] font-bold text-zinc-400">↑</div>
                     <div className="w-4 h-4 border border-zinc-600 rounded-[2px] flex items-center justify-center text-[8px] font-bold text-zinc-400">↓</div>
                 </div>
-                <span className="text-[9px] font-bold tracking-wider text-zinc-500 uppercase">NAVIGATE</span>
+                <span className="text-[9px] font-bold tracking-wider text-zinc-500 uppercase">{t('runtime.navigate')}</span>
             </div>
             <div className="w-[1px] h-3 bg-zinc-800"></div>
             <div className="flex items-center gap-2">
                 <div className="h-4 px-1.5 border border-zinc-600 rounded-[2px] flex items-center justify-center text-[8px] font-bold text-zinc-400">ENTER</div>
-                <span className="text-[9px] font-bold tracking-wider text-zinc-500 uppercase">SELECT</span>
+                <span className="text-[9px] font-bold tracking-wider text-zinc-500 uppercase">{t('runtime.select')}</span>
             </div>
             <div className="w-[1px] h-3 bg-zinc-800"></div>
             <div className="flex items-center gap-2">
                 <div className="h-4 px-1.5 border border-zinc-600 rounded-[2px] flex items-center justify-center text-[8px] font-bold text-zinc-400">ESC</div>
-                <span className="text-[9px] font-bold tracking-wider text-zinc-500 uppercase">LEAVE</span>
+                <span className="text-[9px] font-bold tracking-wider text-zinc-500 uppercase">{t('runtime.leave')}</span>
             </div>
         </div>
 

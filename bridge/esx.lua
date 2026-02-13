@@ -38,10 +38,69 @@ function Bridge.ESX.HasGroup(source, group)
     if IsDuplicityVersion() then
         local xPlayer = Bridge.ESX.GetPlayer(source)
         if xPlayer then
-            return xPlayer.getGroup() == group
+            -- Check admin group first
+            if xPlayer.getGroup() == group then return true end
+            -- Check job name
+            if xPlayer.getJob() and xPlayer.getJob().name == group then return true end
+        end
+    else
+        -- Client side: check local player job
+        local playerData = ESX.GetPlayerData()
+        if playerData and playerData.job and playerData.job.name == group then
+            return true
         end
     end
     return false
+end
+
+function Bridge.ESX.HasItem(source, item, count)
+    count = count or 1
+    if IsDuplicityVersion() then
+        local xPlayer = Bridge.ESX.GetPlayer(source)
+        if xPlayer then
+            local itemData = xPlayer.getInventoryItem(item)
+            return itemData ~= nil and (itemData.count or 0) >= count
+        end
+    else
+        -- Client side: check local player inventory
+        local playerData = ESX.GetPlayerData()
+        if playerData and playerData.inventory then
+            for _, v in ipairs(playerData.inventory) do
+                if v.name == item then
+                    return (v.count or 0) >= count
+                end
+            end
+        end
+    end
+    return false
+end
+
+function Bridge.ESX.GetMoney(source, moneyType)
+    moneyType = moneyType or 'cash'
+    if IsDuplicityVersion() then
+        local xPlayer = Bridge.ESX.GetPlayer(source)
+        if xPlayer then
+            if moneyType == 'cash' then
+                return xPlayer.getMoney()
+            else
+                return xPlayer.getAccount(moneyType) and xPlayer.getAccount(moneyType).money or 0
+            end
+        end
+    else
+        local playerData = ESX.GetPlayerData()
+        if playerData then
+            if moneyType == 'cash' then
+                return playerData.money or 0
+            elseif playerData.accounts then
+                for _, account in ipairs(playerData.accounts) do
+                    if account.name == moneyType then
+                        return account.money or 0
+                    end
+                end
+            end
+        end
+    end
+    return 0
 end
 
 function Bridge.ESX.AddItem(source, item, count)

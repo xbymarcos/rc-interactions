@@ -80,6 +80,21 @@ function Bridge.QBCore.RemoveItem(source, item, count)
     return Player.Functions.RemoveItem(item, count or 1)
 end
 
+function Bridge.QBCore.GetMoney(source, moneyType)
+    if not QBCore then Bridge.QBCore.Init() end
+    if not QBCore or not QBCore.Functions then return 0 end
+    moneyType = moneyType or 'cash'
+    if IsDuplicityVersion() then
+        local Player = Bridge.QBCore.GetPlayer(source)
+        if not Player then return 0 end
+        return Player.PlayerData.money[moneyType] or 0
+    else
+        local PlayerData = QBCore.Functions.GetPlayerData()
+        if not PlayerData or not PlayerData.money then return 0 end
+        return PlayerData.money[moneyType] or 0
+    end
+end
+
 function Bridge.QBCore.AddMoney(source, moneyType, amount)
     if not IsDuplicityVersion() then return false end
     local Player = QBCore.Functions.GetPlayer(source)

@@ -27,13 +27,13 @@ This document outlines the planned evolution of `rc-interactions`, organized by 
 
 | # | Task | Description | Status |
 |---|------|-------------|--------|
-| 1.1 | **Missing `HasItem` in ESX bridge** | `Bridge.ESX.HasItem()` is called by the wrapper in `bridge/init.lua` but is never defined in `bridge/esx.lua`. Causes runtime crash when using CONDITION nodes with `item:` prefix. | ⬜ Todo |
-| 1.2 | **Missing `HasItem` in Standalone bridge** | Same issue as ESX — `Bridge.Standalone.HasItem()` is not defined. The wrapper in `init.lua` falls back to `return true` for standalone, but the function should exist explicitly. | ⬜ Todo |
-| 1.3 | **`HasGroup` inconsistency across bridges** | QBCore server uses ACE permissions (`HasPermission`), client compares `job.name`/`gang.name`. ESX only checks admin groups (`getGroup()`), not jobs. Standalone uses ACE. Behavior should be consistent. | ⬜ Todo |
-| 1.4 | **`GetMoney` missing in all bridges** | `CheckCondition` in `client/runtime.lua` always returns `false` for `money:` conditions because no bridge implements a `GetMoney` function. Money-based conditions are completely non-functional. | ⬜ Todo |
-| 1.5 | **IDs generated with `Date.now()`** | Project and node IDs use `Date.now().toString()` which risks collisions on fast operations. Should migrate to `crypto.randomUUID()` or a proper UUID library. | ⬜ Todo |
-| 1.6 | **No JSON schema validation on import** | Importing a project from JSON performs no validation. A malformed JSON can silently break the editor or runtime. | ⬜ Todo |
-| 1.7 | **Hardcoded strings outside i18n** | Labels like "NPC MODEL", "COORDS", "UNDO", "REDO", "RESET VIEW", "Waiting for event...", "DESTROY NODE" are hardcoded in English and not part of the `LanguageContext` translation system. | ⬜ Todo |
+| 1.1 | **Missing `HasItem` in ESX bridge** | `Bridge.ESX.HasItem()` is called by the wrapper in `bridge/init.lua` but is never defined in `bridge/esx.lua`. Causes runtime crash when using CONDITION nodes with `item:` prefix. | ✅ Done |
+| 1.2 | **Missing `HasItem` in Standalone bridge** | Same issue as ESX — `Bridge.Standalone.HasItem()` is not defined. The wrapper in `init.lua` falls back to `return true` for standalone, but the function should exist explicitly. | ✅ Done |
+| 1.3 | **`HasGroup` inconsistency across bridges** | QBCore server uses ACE permissions (`HasPermission`), client compares `job.name`/`gang.name`. ESX only checks admin groups (`getGroup()`), not jobs. Standalone uses ACE. Behavior should be consistent. | ✅ Done |
+| 1.4 | **`GetMoney` missing in all bridges** | `CheckCondition` in `client/runtime.lua` always returns `false` for `money:` conditions because no bridge implements a `GetMoney` function. Money-based conditions are completely non-functional. | ✅ Done |
+| 1.5 | **IDs generated with `Date.now()`** | Project and node IDs use `Date.now().toString()` which risks collisions on fast operations. Should migrate to `crypto.randomUUID()` or a proper UUID library. | ✅ Done |
+| 1.6 | **No JSON schema validation on import** | Importing a project from JSON performs no validation. A malformed JSON can silently break the editor or runtime. | ✅ Done |
+| 1.7 | **Hardcoded strings outside i18n** | Labels like "NPC MODEL", "COORDS", "UNDO", "REDO", "RESET VIEW", "Waiting for event...", "DESTROY NODE" are hardcoded in English and not part of the `LanguageContext` translation system. | ✅ Done |
 | 1.8 | **`SET_VARIABLE` not handled in runtime** | `ProcessNode` in `client/runtime.lua` did not handle `SET_VARIABLE` node type, causing the flow to silently stop. | ✅ Done |
 
 ---
@@ -136,7 +136,7 @@ Currently `SET_VARIABLE` and `CONDITION` only work with local ephemeral memory t
 | 6.3 | **Dashboard pagination** | The project grid doesn't scale to hundreds of flows. Add pagination or virtual scrolling. | ⬜ Todo |
 | 6.4 | **Advanced sorting & filters** | Sort by date, node count, author. Filter by group, status, date range. | ⬜ Todo |
 | 6.5 | **Bulk export/import** | Export all projects in a group as a single package. Import multiple projects at once. | ⬜ Todo |
-| 6.6 | **Automated tests** | Unit tests for the logic engine (both Lua and TypeScript `traverseLogic`). | ⬜ Todo |
+| 6.6 | **Automated tests** | Unit tests for the logic engine (both Lua and TypeScript `traverseLogic`). | ✅ Done |
 | 6.7 | **Additional languages** | Add French, German, Portuguese translations. Auto-detect browser language. Persist language preference. | ⬜ Todo |
 | 6.8 | **Documentation with examples** | Guide with real use cases: NPC shops, quest lines, branching missions, tutorial NPCs. | ⬜ Todo |
 | 6.9 | **Expanded public API** | New exports: query variable state, list active interactions, force end dialogue, get interaction metadata. | ⬜ Todo |
@@ -194,14 +194,14 @@ When implementing any node from Phase 2, these files must be modified:
 
 | Function | QBCore | ESX | Standalone |
 |----------|--------|-----|------------|
-| `HasItem` | ✅ | ❌ Missing | ❌ Missing |
-| `HasGroup` (client) | ✅ Partial | ❌ | ❌ |
-| `HasGroup` (server) | ✅ ACE-based | ✅ Admin groups only | ✅ ACE-based |
-| `Notify` (server) | ❌ Commented out | ❌ Empty | ❌ Empty |
-| `GetMoney` | ❌ Not implemented | ❌ Not implemented | ❌ Not implemented |
+| `HasItem` | ✅ | ✅ Client + Server | ✅ Stub (override) |
+| `HasGroup` (client) | ✅ Job/Gang | ✅ Job | ✅ ACE |
+| `HasGroup` (server) | ✅ ACE-based | ✅ Admin + Job | ✅ ACE-based |
+| `Notify` (server) | ✅ | ✅ | ✅ Fallback |
+| `GetMoney` | ✅ Client + Server | ✅ Client + Server | ✅ Stub (override) |
 | `GetJob` / `GetGang` | ❌ Not implemented | ❌ Not implemented | ❌ Not implemented |
-| `AddItem` / `RemoveItem` | ✅ | ✅ | ❌ Stubs |
-| `AddMoney` / `RemoveMoney` | ✅ | ✅ (cash/bank only) | ❌ Stubs |
+| `AddItem` / `RemoveItem` | ✅ | ✅ | ✅ Stubs |
+| `AddMoney` / `RemoveMoney` | ✅ | ✅ (cash/bank only) | ✅ Stubs |
 
 ---
 

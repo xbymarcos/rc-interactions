@@ -148,7 +148,17 @@ function Bridge.HasItem(source, item, count)
     elseif Bridge.Framework == 'esx' then
         return Bridge.ESX.HasItem(source, item, count)
     else
-        return true -- Standalone assumes true or implement custom logic
+        return Bridge.Standalone.HasItem(source, item, count)
+    end
+end
+
+function Bridge.GetMoney(source, moneyType)
+    if Bridge.Framework == 'qbcore' then
+        return Bridge.QBCore.GetMoney(source, moneyType)
+    elseif Bridge.Framework == 'esx' then
+        return Bridge.ESX.GetMoney(source, moneyType)
+    else
+        return Bridge.Standalone.GetMoney(source, moneyType)
     end
 end
 

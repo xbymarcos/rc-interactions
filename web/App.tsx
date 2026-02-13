@@ -132,9 +132,7 @@ const App: React.FC = () => {
   // --- CRUD OPERATIONS ---
 
   const handleCreateProject = (name: string, group: string = 'General') => {
-    const newId = `proj_${Date.now()}`; // Temporary ID, server should ideally assign UUID
-    // Better to use a UUID generator here if possible or let server handle it.
-    // For now, we use this.
+    const newId = `proj_${crypto.randomUUID()}`;
     const newProject = generateMockProject(newId, name, group);
     setProjects(prev => [newProject, ...prev]); 
     setCurrentProjectId(newId);
@@ -276,9 +274,29 @@ const App: React.FC = () => {
     setImportModalOpen(true);
   };
 
+  const validateProjectSchema = (proj: any): proj is Project => {
+    if (!proj || typeof proj !== 'object') return false;
+    if (typeof proj.name !== 'string' || !proj.name.trim()) return false;
+    if (!proj.data || typeof proj.data !== 'object') return false;
+    if (!Array.isArray(proj.data.nodes) || !Array.isArray(proj.data.connections)) return false;
+
+    // Validate each node has minimum required fields
+    for (const node of proj.data.nodes) {
+      if (!node.id || !node.type || !node.position) return false;
+      if (typeof node.position.x !== 'number' || typeof node.position.y !== 'number') return false;
+    }
+
+    // Validate each connection has required fields
+    for (const conn of proj.data.connections) {
+      if (!conn.id || !conn.fromNodeId || !conn.toNodeId) return false;
+    }
+
+    return true;
+  };
+
   const processImportedData = (data: any) => {
     // Determine if it's a raw project or an exported structure
-    let projectToImport: Project | null = null;
+    let projectToImport: any = null;
     
     if (data.project && data.meta) {
       projectToImport = data.project;
@@ -286,26 +304,27 @@ const App: React.FC = () => {
        projectToImport = data;
     }
 
-    if (projectToImport) {
-       // Regenerate ID to avoid conflicts
-       const newId = `proj_${Date.now()}`;
-       const newProject = {
-         ...projectToImport,
-         id: newId,
-         name: `${projectToImport.name} (Imported)`,
-         createdAt: new Date().toISOString(),
-         updatedAt: new Date().toISOString()
-       };
-       
-       setProjects(prev => [newProject, ...prev]);
-       // Add group if it doesn't exist
-       if (!groups.includes(newProject.group)) {
-          setGroups(prev => [...prev, newProject.group]);
-       }
-       setImportModalOpen(false);
-       return true;
+    if (!projectToImport || !validateProjectSchema(projectToImport)) {
+      return false;
     }
-    return false;
+
+    // Regenerate ID to avoid conflicts
+    const newId = `proj_${crypto.randomUUID()}`;
+    const newProject: Project = {
+      ...projectToImport,
+      id: newId,
+      name: `${projectToImport.name} (Imported)`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    setProjects(prev => [newProject, ...prev]);
+    // Add group if it doesn't exist
+    if (!groups.includes(newProject.group)) {
+       setGroups(prev => [...prev, newProject.group]);
+    }
+    setImportModalOpen(false);
+    return true;
   };
 
   const executeImport = () => {

@@ -345,13 +345,19 @@ function CheckCondition(data)
         end
 
     elseif varType == 'money' then
-        -- We don't have GetMoney in client bridge yet, only server side usually has secure money.
-        -- But we can try to get it if framework allows.
-        -- For QBCore client: QBCore.Functions.GetPlayerData().money[type]
-        -- For ESX client: ESX.GetPlayerData().accounts...
-        -- Let's implement a Bridge.GetMoney(type) in client bridge later or use server callback.
-        -- For now, return false or implement client side check.
-        return false 
+        currentValue = Bridge.GetMoney(GetPlayerServerId(PlayerId()), varName)
+        local op = data.conditionOperator or '=='
+        local numCurrent = tonumber(currentValue) or 0
+        local numTarget = tonumber(targetValue) or 0
+
+        if op == '==' then return numCurrent == numTarget
+        elseif op == '!=' then return numCurrent ~= numTarget
+        elseif op == '>' then return numCurrent > numTarget
+        elseif op == '<' then return numCurrent < numTarget
+        elseif op == '>=' then return numCurrent >= numTarget
+        elseif op == '<=' then return numCurrent <= numTarget
+        end
+        return false
         
     elseif varType == 'job' then
         return Bridge.HasGroup(GetPlayerServerId(PlayerId()), varName)

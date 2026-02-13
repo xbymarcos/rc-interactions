@@ -129,7 +129,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                   <button 
                     onClick={(e) => handleGroupDeleteClick(e, group)}
                     className="absolute right-10 top-2 text-rose-800 opacity-0 group-hover/item:opacity-100 hover:text-rose-500 transition-all text-[10px]"
-                    title="Delete Group"
+                    title={t('dashboard.delete_group_btn')}
                   >✕</button>
                )}
             </div>
@@ -245,7 +245,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                      <button 
                        onClick={(e) => handleDeleteClick(e, project.id)}
                        className="w-7 h-7 flex items-center justify-center bg-zinc-950/80 text-zinc-500 hover:text-rose-500 hover:bg-rose-500/10 border border-zinc-800 hover:border-rose-500/50 rounded-sm"
-                       title="Delete"
+                       title={t('dashboard.delete_btn')}
                      >
                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
